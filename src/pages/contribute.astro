@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Contribute to WorkAuthUS" description="How to suggest corrections, propose new topics, and volunteer as a reviewer.">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8" data-pagefind-body>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-6">Contribute</h1>
+
+    <section class="prose mb-10">
+      <h2>Suggest a correction</h2>
+      <p>
+        If you find a factual error, outdated information, or a broken link, please <a href="https://github.com/example/workauthorus/issues/new?template=correction.md" target="_blank" rel="noopener noreferrer">open an issue on GitHub</a>. Include:
+      </p>
+      <ul>
+        <li>The URL of the page with the issue</li>
+        <li>What is incorrect or outdated</li>
+        <li>A link to the primary source that supports the correction (a .gov URL is preferred)</li>
+      </ul>
+      <p>
+        You do not need a GitHub account to report issues — you can also email [contact@example.com] with the same information.
+      </p>
+    </section>
+
+    <section class="prose mb-10">
+      <h2>Propose a new topic</h2>
+      <p>
+        To propose a new topic page, <a href="https://github.com/example/workauthorus/issues/new?template=new-topic.md" target="_blank" rel="noopener noreferrer">open a "new topic" issue on GitHub</a>. Please include:
+      </p>
+      <ul>
+        <li>The question you want answered (phrase it as a user would search it)</li>
+        <li>Which immigration status(es) it applies to</li>
+        <li>At least one primary source (a .gov URL)</li>
+        <li>A brief draft of the answer, if you have one</li>
+      </ul>
+      <p>
+        If you want to write the page yourself, you can also submit a pull request. Topic pages are Markdown files in <code>src/content/topics/</code> following the template described in the README.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-slate-100 mb-4">Editorial standards</h2>
+      <p class="text-gray-700 dark:text-slate-300 leading-relaxed mb-4">All contributed content must meet these standards:</p>
+      <ul class="space-y-3 text-gray-700 dark:text-slate-300 leading-relaxed">
+        <li class="flex gap-3">
+          <span class="text-blue-700 dark:text-blue-400 font-bold mt-0.5">1.</span>
+          <span>Every factual claim on a topic page links to a primary source — a statute, regulation, or official page on a .gov domain — or to an authoritative secondary source such as a law school clinic, AILA, CLINIC, or a legal aid organization.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="text-blue-700 dark:text-blue-400 font-bold mt-0.5">2.</span>
+          <span>Reddit, Quora, personal blogs, law firm marketing pages, and AI-generated content are not cited.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="text-blue-700 dark:text-blue-400 font-bold mt-0.5">3.</span>
+          <span>Every page shows a "Last verified" date. Pages are re-verified at least every 6 months and immediately when a relevant regulation changes.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="text-blue-700 dark:text-blue-400 font-bold mt-0.5">4.</span>
+          <span>Pages are reviewed by a second human before publication. Ideally a licensed immigration attorney or DOJ-accredited representative reviews the page before it is marked verified.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="text-blue-700 dark:text-blue-400 font-bold mt-0.5">5.</span>
+          <span>The site provides legal information, not legal advice. It does not create an attorney-client relationship.</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="prose mb-10">
+      <h2>Volunteer as a reviewer</h2>
+      <p>
+        We are actively seeking <strong>licensed immigration attorneys</strong> and <strong>DOJ-accredited representatives</strong> who are willing to review topic pages before they are published. Reviewing a page means confirming that:
+      </p>
+      <ul>
+        <li>The primary sources cited are accurate and current</li>
+        <li>The plain-language summary is not misleading</li>
+        <li>The "Common gotchas" section covers the most important edge cases</li>
+      </ul>
+      <p>
+        Reviewers are credited by name on each page they verify (or listed as "Reviewed anonymously" if they prefer).
+      </p>
+      <p>
+        To volunteer, please <a href="https://github.com/example/workauthorus/issues/new?template=reviewer.md" target="_blank" rel="noopener noreferrer">open a reviewer volunteer issue on GitHub</a> or email [contact@example.com].
+      </p>
+    </section>
+
+    <aside role="note" class="p-4 border border-gray-200 dark:border-slate-700 rounded bg-gray-50 dark:bg-slate-900 text-sm text-gray-600 dark:text-slate-400">
+      <strong class="text-gray-800 dark:text-slate-200">Disclaimer:</strong> This site provides legal information, not legal advice. Contributing to this site does not create an attorney-client relationship between contributors and site visitors.
+    </aside>
+  </div>
+</BaseLayout>

@@ -1,0 +1,79 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="About WorkAuthUS" description="What WorkAuthUS is, how it works, and our editorial standards.">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8" data-pagefind-body>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-6">About WorkAuthUS</h1>
+
+    <section class="prose mb-10">
+      <h2>What this project is</h2>
+      <p>
+        WorkAuthUS is a free, open-source, static website that answers common questions non-citizens have about work authorization in the United States. Every topic page links directly to the primary legal source — a federal statute, regulation (Code of Federal Regulations), or official government agency page — so readers can verify information themselves instead of relying solely on our summary.
+      </p>
+      <p>
+        The site is maintained by volunteers and is not affiliated with any government agency, law firm, or bar association. It is not a substitute for legal advice.
+      </p>
+    </section>
+
+    <section class="prose mb-10">
+      <h2>Who runs it</h2>
+      <p>
+        Maintained by [Name]. Content reviewed by [Reviewer or "Pending attorney review"].
+      </p>
+      <p>
+        We are actively seeking licensed immigration attorneys and DOJ-accredited representatives who are willing to review topic pages before they are published. If you can help, please see the <a href="/contribute">Contribute</a> page.
+      </p>
+    </section>
+
+    <section class="mb-10">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-slate-100 mb-4">Editorial standards</h2>
+      <ul class="space-y-3 text-gray-700 dark:text-slate-300 leading-relaxed">
+        <li class="flex gap-3">
+          <span class="text-blue-700 dark:text-blue-400 font-bold mt-0.5">1.</span>
+          <span>Every factual claim on a topic page links to a primary source — a statute, regulation, or official page on a .gov domain — or to an authoritative secondary source such as a law school clinic, the American Immigration Lawyers Association (AILA), CLINIC, or a legal aid organization.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="text-blue-700 dark:text-blue-400 font-bold mt-0.5">2.</span>
+          <span>Reddit, Quora, personal blogs, law firm marketing pages, and AI-generated content are not cited.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="text-blue-700 dark:text-blue-400 font-bold mt-0.5">3.</span>
+          <span>Every page shows a "Last verified" date. Pages are re-verified at least every 6 months and immediately when a relevant regulation changes.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="text-blue-700 dark:text-blue-400 font-bold mt-0.5">4.</span>
+          <span>Pages are reviewed by a second human before publication. Ideally a licensed immigration attorney or DOJ-accredited representative reviews the page before it is marked verified.</span>
+        </li>
+        <li class="flex gap-3">
+          <span class="text-blue-700 dark:text-blue-400 font-bold mt-0.5">5.</span>
+          <span>The site provides legal information, not legal advice. It does not create an attorney-client relationship.</span>
+        </li>
+      </ul>
+    </section>
+
+    <section class="prose mb-10">
+      <h2>How verification works</h2>
+      <p>
+        Each topic page displays a "Last verified" date and the name of the person who verified it. Before a page is published with a verified date, a second reviewer (ideally a licensed immigration attorney or DOJ-accredited representative) must confirm that the primary sources cited are still accurate and current.
+      </p>
+      <p>
+        Pages with <code>verifiedBy: "Pending review"</code> have been drafted but not yet confirmed by a second reviewer. Treat these pages with additional caution.
+      </p>
+    </section>
+
+    <section class="prose mb-10">
+      <h2>License and contribution</h2>
+      <p>
+        Site content (the topic pages and other written material) is licensed under <a href="https://creativecommons.org/licenses/by/4.0/" target="_blank" rel="noopener noreferrer">Creative Commons Attribution 4.0 (CC BY 4.0)</a>.
+        The site code is licensed under the <a href="https://opensource.org/licenses/MIT" target="_blank" rel="noopener noreferrer">MIT License</a>.
+      </p>
+      <p>
+        To suggest a correction or contribute a new topic, see the <a href="/contribute">Contribute</a> page.
+      </p>
+    </section>
+
+    <aside role="note" class="p-4 border border-gray-200 dark:border-slate-700 rounded bg-gray-50 dark:bg-slate-900 text-sm text-gray-600 dark:text-slate-400">
+      <strong class="text-gray-800 dark:text-slate-200">Disclaimer:</strong> This site provides legal information, not legal advice. Nothing here creates an attorney-client relationship. Consult a licensed immigration attorney or <a href="/find-legal-help" class="text-blue-700 dark:text-blue-400 underline hover:text-blue-900">accredited representative</a> for advice specific to your situation.
+    </aside>
+  </div>
+</BaseLayout>

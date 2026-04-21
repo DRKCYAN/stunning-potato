@@ -1,0 +1,53 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getCollection } from 'astro:content';
+
+const allTopics = await getCollection('topics', ({ data }) =>
+  import.meta.env.PROD ? !data.draft : true
+);
+
+// Sort topics by lastVerified descending for a simple changelog view
+const recentlyVerified = [...allTopics]
+  .sort((a, b) => b.data.lastVerified.getTime() - a.data.lastVerified.getTime())
+  .slice(0, 20);
+---
+<BaseLayout title="Changelog" description="Recent content updates and verifications on WorkAuthUS.">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8" data-pagefind-body>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-3">Changelog</h1>
+    <p class="text-gray-600 dark:text-slate-400 mb-8 leading-relaxed">
+      Recent content additions and verifications, in reverse chronological order.
+    </p>
+
+    <section class="mb-8">
+      <h2 class="text-lg font-bold text-gray-900 dark:text-slate-100 mb-4">Recent topic verifications</h2>
+      <ul class="space-y-4">
+        {recentlyVerified.map(topic => (
+          <li class="flex items-start gap-4 text-sm border-b border-gray-100 dark:border-slate-800 pb-4">
+            <time
+              datetime={topic.data.lastVerified.toISOString().slice(0, 10)}
+              class="flex-shrink-0 font-mono text-gray-500 dark:text-slate-500 w-28"
+            >
+              {topic.data.lastVerified.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'UTC' })}
+            </time>
+            <div>
+              <a href={`/topics/${topic.slug}`} class="font-medium text-blue-700 dark:text-blue-400 underline hover:text-blue-900 dark:hover:text-blue-300">
+                {topic.data.title}
+              </a>
+              <p class="text-gray-500 dark:text-slate-500 mt-0.5">Verified by: {topic.data.verifiedBy}</p>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <section class="prose text-sm">
+      <h2>Site changelog</h2>
+      <dl class="not-prose space-y-4">
+        <div>
+          <dt class="font-mono text-gray-500 dark:text-slate-500">2026-04-21</dt>
+          <dd class="text-gray-700 dark:text-slate-300 mt-1">Initial site launch with 12 topic pages covering F-1, H-1B, H-4, L-2, and general work authorization topics.</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+</BaseLayout>

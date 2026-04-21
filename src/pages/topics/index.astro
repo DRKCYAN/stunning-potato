@@ -1,0 +1,79 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TopicCard from '../../components/TopicCard.astro';
+import Search from '../../components/Search.astro';
+import { getCollection } from 'astro:content';
+
+const allTopics = await getCollection('topics', ({ data }) =>
+  import.meta.env.PROD ? !data.draft : true
+);
+
+const statusLabels: Record<string, string> = {
+  f1: 'F-1 Student', j1: 'J-1 Exchange Visitor', h1b: 'H-1B Worker',
+  h4: 'H-4 Dependent', l1: 'L-1 Transferee', l2: 'L-2 Dependent',
+  o1: 'O-1 Worker', tn: 'TN Professional', gc: 'Green Card Holder',
+  asylum: 'Asylum Seeker / Asylee', refugee: 'Refugee',
+  daca: 'DACA Recipient', uvisa: 'U Visa Holder', tvisa: 'T Visa Holder',
+  general: 'General / Multiple Statuses',
+};
+
+const statusOrder = [
+  'f1', 'j1', 'h1b', 'h4', 'l1', 'l2', 'o1', 'tn', 'gc',
+  'asylum', 'refugee', 'daca', 'uvisa', 'tvisa', 'general',
+];
+
+// Group topics by first status
+const grouped: Record<string, typeof allTopics> = {};
+for (const status of statusOrder) {
+  const topics = allTopics
+    .filter(t => t.data.statuses.includes(status as any))
+    .sort((a, b) => a.data.title.localeCompare(b.data.title));
+  if (topics.length > 0) grouped[status] = topics;
+}
+---
+<BaseLayout title="Browse All Topics" description="All US work authorization topics, organized by immigration status.">
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8" data-pagefind-body>
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-2">Browse All Topics</h1>
+    <p class="text-gray-600 dark:text-slate-400 mb-6">
+      {allTopics.length} topic{allTopics.length !== 1 ? 's' : ''} across {Object.keys(grouped).length} immigration statuses.
+    </p>
+
+    <!-- Search -->
+    <div class="mb-8 max-w-xl">
+      <Search />
+    </div>
+
+    <!-- Filter chips -->
+    <nav aria-label="Filter by status" class="mb-8">
+      <p class="text-sm font-medium text-gray-700 dark:text-slate-300 mb-2">Jump to status:</p>
+      <div class="flex flex-wrap gap-2">
+        {Object.entries(grouped).map(([status]) => (
+          <a
+            href={`#${status}`}
+            class="inline-block text-sm bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 px-3 py-1 rounded hover:bg-blue-100 hover:text-blue-800 dark:hover:bg-blue-900/40 dark:hover:text-blue-300 transition-colors"
+          >
+            {statusLabels[status]}
+          </a>
+        ))}
+      </div>
+    </nav>
+
+    <!-- Grouped lists -->
+    {Object.entries(grouped).map(([status, topics]) => (
+      <section id={status} class="mb-12">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-slate-100 mb-1 flex items-baseline gap-3">
+          {statusLabels[status]}
+          <a href={`/status/${status}`} class="text-sm font-normal text-blue-700 dark:text-blue-400 underline hover:text-blue-900 dark:hover:text-blue-300">
+            Status overview →
+          </a>
+        </h2>
+        <p class="text-sm text-gray-500 dark:text-slate-500 mb-4">{topics.length} topic{topics.length !== 1 ? 's' : ''}</p>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {topics.map(topic => (
+            <TopicCard topic={topic} />
+          ))}
+        </div>
+      </section>
+    ))}
+  </div>
+</BaseLayout>

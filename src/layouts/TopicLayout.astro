@@ -1,0 +1,156 @@
+---
+import BaseLayout from './BaseLayout.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import Disclaimer from '../components/Disclaimer.astro';
+import LastVerified from '../components/LastVerified.astro';
+import TopicCard from '../components/TopicCard.astro';
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+export interface Props {
+  topic: CollectionEntry<'topics'>;
+}
+
+const { topic } = Astro.props;
+const { data, slug } = topic;
+
+const statusLabels: Record<string, string> = {
+  f1: 'F-1', j1: 'J-1', h1b: 'H-1B', h4: 'H-4',
+  l1: 'L-1', l2: 'L-2', o1: 'O-1', tn: 'TN',
+  gc: 'Green Card', asylum: 'Asylum', refugee: 'Refugee',
+  daca: 'DACA', uvisa: 'U Visa', tvisa: 'T Visa', general: 'General',
+};
+
+// Fetch related topics
+let relatedTopicsData: CollectionEntry<'topics'>[] = [];
+if (data.relatedTopics && data.relatedTopics.length > 0) {
+  const allTopics = await getCollection('topics', ({ data: d }) =>
+    import.meta.env.PROD ? !d.draft : true
+  );
+  relatedTopicsData = allTopics.filter(t => data.relatedTopics!.includes(t.slug));
+}
+
+const primaryStatus = data.statuses[0];
+---
+<BaseLayout title={data.title}>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8" data-pagefind-body>
+    <!-- Breadcrumbs -->
+    <Breadcrumbs items={[
+      { label: 'Home', href: '/' },
+      { label: 'Topics', href: '/topics' },
+      { label: statusLabels[primaryStatus] ?? primaryStatus.toUpperCase(), href: `/status/${primaryStatus}` },
+      { label: data.title },
+    ]} />
+
+    <!-- Title -->
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-slate-100 mt-5 mb-4 leading-tight">
+      {data.title}
+    </h1>
+
+    <!-- Short answer callout -->
+    <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-700 dark:border-blue-500 p-4 my-6 rounded-sm">
+      <p class="text-gray-800 dark:text-slate-200 leading-relaxed">{data.shortAnswer}</p>
+    </div>
+
+    <!-- Metadata block -->
+    <div class="flex flex-wrap items-center gap-2 my-4 text-sm">
+      <span class="text-gray-500 dark:text-slate-500 font-medium">Applies to:</span>
+      {data.statuses.map(s => (
+        <a
+          href={`/status/${s}`}
+          class="inline-block bg-gray-100 dark:bg-slate-800 text-gray-700 dark:text-slate-300 px-2 py-0.5 rounded text-xs font-medium hover:bg-blue-100 hover:text-blue-800 dark:hover:bg-blue-900/40 dark:hover:text-blue-300 transition-colors"
+        >
+          {statusLabels[s] ?? s}
+        </a>
+      ))}
+      <LastVerified date={data.lastVerified} verifiedBy={data.verifiedBy} />
+    </div>
+
+    <!-- Rendered Markdown body -->
+    <article class="prose mt-8">
+      <slot />
+    </article>
+
+    <!-- Primary sources -->
+    <section class="mt-10 pt-6 border-t border-gray-200 dark:border-slate-700">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-slate-100 mb-4">Primary sources</h2>
+      <ul class="space-y-3 text-sm">
+        {data.primarySources.map(source => (
+          <li class="flex items-start gap-2">
+            <a
+              href={source.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-blue-700 dark:text-blue-400 underline hover:text-blue-900 dark:hover:text-blue-300 inline-flex items-start gap-1.5 leading-relaxed"
+            >
+              <span>
+                <span class="font-mono text-gray-500 dark:text-slate-500">{source.citation}</span>
+                {' — '}
+                {source.title}
+              </span>
+              <svg
+                aria-label="(opens in new tab)"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 16 16"
+                fill="currentColor"
+                class="w-3 h-3 mt-1 flex-shrink-0 text-gray-400 dark:text-slate-600"
+              >
+                <path d="M6.22 8.72a.75.75 0 0 0 1.06 1.06l5.22-5.22v1.69a.75.75 0 0 0 1.5 0v-3.5a.75.75 0 0 0-.75-.75h-3.5a.75.75 0 0 0 0 1.5h1.69L6.22 8.72Z"/>
+                <path d="M3.5 6.75c0-.69.56-1.25 1.25-1.25H7A.75.75 0 0 0 7 4H4.75A2.75 2.75 0 0 0 2 6.75v4.5A2.75 2.75 0 0 0 4.75 14h4.5A2.75 2.75 0 0 0 12 11.25V9a.75.75 0 0 0-1.5 0v2.25c0 .69-.56 1.25-1.25 1.25h-4.5c-.69 0-1.25-.56-1.25-1.25v-4.5Z"/>
+              </svg>
+            </a>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- Further reading -->
+    {data.secondarySources && data.secondarySources.length > 0 && (
+      <section class="mt-8">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-slate-100 mb-4">Further reading</h2>
+        <ul class="space-y-2 text-sm">
+          {data.secondarySources.map(source => (
+            <li>
+              <a
+                href={source.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-blue-700 dark:text-blue-400 underline hover:text-blue-900 dark:hover:text-blue-300"
+              >
+                {source.title}
+              </a>
+              <span class="text-gray-500 dark:text-slate-500 ml-1">— {source.publisher}</span>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <!-- Related topics -->
+    {relatedTopicsData.length > 0 && (
+      <section class="mt-8">
+        <h2 class="text-xl font-bold text-gray-900 dark:text-slate-100 mb-4">Related topics</h2>
+        <div class="grid sm:grid-cols-2 gap-4">
+          {relatedTopicsData.map(t => (
+            <TopicCard topic={t} />
+          ))}
+        </div>
+      </section>
+    )}
+
+    <!-- Disclaimer -->
+    <Disclaimer />
+
+    <!-- Report issue -->
+    <p class="mt-6 text-sm text-gray-500 dark:text-slate-500">
+      <a
+        href="https://github.com/example/workauthorus/issues/new"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-blue-700 dark:text-blue-400 underline hover:text-blue-900 dark:hover:text-blue-300"
+      >
+        See something wrong? Open an issue on GitHub
+      </a>
+    </p>
+  </div>
+</BaseLayout>

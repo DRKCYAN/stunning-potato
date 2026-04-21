@@ -1,0 +1,15 @@
+---
+---
+<link href="/pagefind/pagefind-ui.css" rel="stylesheet" />
+<div id="search" aria-label="Search topics"></div>
+<script is:inline>
+  window.addEventListener('DOMContentLoaded', () => {
+    const script = document.createElement('script');
+    script.src = '/pagefind/pagefind-ui.js';
+    script.onload = () => {
+      // @ts-ignore
+      new PagefindUI({ element: '#search', showSubResults: true, resetStyles: false });
+    };
+    document.body.appendChild(script);
+  });
+</script>

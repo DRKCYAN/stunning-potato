@@ -1,0 +1,124 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TopicCard from '../../components/TopicCard.astro';
+import { getCollection } from 'astro:content';
+
+const statusInfo: Record<string, { label: string; description: string }> = {
+  f1: {
+    label: 'F-1 Student',
+    description: 'F-1 is the most common nonimmigrant visa for international students. It allows full-time study at a Student and Exchange Visitor Program (SEVP)-certified college, university, seminary, conservatory, academic high school, or language training program. F-1 students are sponsored by their school\'s Designated School Official (DSO) and must maintain full-time enrollment and valid status to remain in the United States. Work authorization for F-1 students is strictly limited and requires either on-campus employment rules, DSO authorization (for CPT), or USCIS authorization (for OPT and economic hardship exceptions).',
+  },
+  j1: {
+    label: 'J-1 Exchange Visitor',
+    description: 'J-1 is a nonimmigrant visa for participants in exchange visitor programs approved by the U.S. Department of State. J-1 holders include students, research scholars, professors, short-term scholars, specialists, au pairs, camp counselors, summer work travel participants, and other cultural exchange visitors. Work authorization rules for J-1 holders vary significantly by program category and are determined by the program\'s designated sponsor organization.',
+  },
+  h1b: {
+    label: 'H-1B Specialty Occupation Worker',
+    description: 'H-1B status is for workers in "specialty occupations" — positions that normally require at least a bachelor\'s degree (or its equivalent) in a specific field of study. H-1B workers must have a U.S. employer sponsor who files a petition with USCIS. Most H-1B visas are subject to an annual numerical cap and lottery process (with exemptions for cap-exempt employers such as universities and nonprofit research institutions). H-1B status is employer-specific: you may only work for the petitioning employer(s).',
+  },
+  h4: {
+    label: 'H-4 Dependent',
+    description: 'H-4 status is available to the spouse and unmarried children under age 21 of H-1B principal visa holders. H-4 status itself does not authorize employment. However, qualifying H-4 spouses may apply for an Employment Authorization Document (EAD) if the H-1B principal has an approved Form I-140 immigrant petition or has been granted an extension of H-1B status beyond the 6-year cap limit under the American Competitiveness in the Twenty-first Century Act (AC21). H-4 children are not eligible for work authorization.',
+  },
+  l1: {
+    label: 'L-1 Intracompany Transferee',
+    description: 'L-1 status allows multinational employers to transfer executives, managers, and workers with specialized knowledge from a foreign affiliate, subsidiary, or parent company to a U.S. location. L-1A is for managers and executives; L-1B is for specialized knowledge workers. L-1 holders are authorized to work only for the petitioning employer. Initial L-1A status is granted for three years (one year for new offices); L-1B for three years. Extensions are available up to a maximum of seven years (L-1A) or five years (L-1B).',
+  },
+  l2: {
+    label: 'L-2 Dependent',
+    description: 'L-2 status is available to the spouse and unmarried children under age 21 of L-1 principal visa holders. As of November 2021, L-2 spouses are automatically authorized to work in the United States incident to their L-2 status, pursuant to a court settlement (Shergill v. Mayorkas) and subsequent DHS rulemaking. An Employment Authorization Document (EAD) can still be obtained to provide documentary evidence of employment authorization for Form I-9 purposes. L-2 children do not have automatic work authorization.',
+  },
+  o1: {
+    label: 'O-1 Worker of Extraordinary Ability',
+    description: 'O-1 status is for individuals with extraordinary ability in the sciences, arts, education, business, or athletics (O-1A), or extraordinary achievement in the motion picture or television industry (O-1B). O-1 holders must be sponsored by a U.S. employer or agent and demonstrate sustained national or international acclaim. O-1 status is employer-specific: workers may only perform the services authorized in the approved petition.',
+  },
+  tn: {
+    label: 'TN Professional (USMCA)',
+    description: 'TN status is available to Canadian and Mexican citizens who qualify to work in one of the designated professional occupations listed in the United States-Mexico-Canada Agreement (USMCA, formerly NAFTA). TN holders must work for the specific petitioning employer in the specific profession listed on their approval. Canadian citizens may apply at the border or a U.S. port of entry; Mexican citizens must apply for a TN visa at a U.S. consulate.',
+  },
+  gc: {
+    label: 'Green Card (Lawful Permanent Resident)',
+    description: 'Lawful Permanent Residents (LPRs), commonly called "green card holders," are authorized to live and work permanently in the United States. A green card (Form I-551) serves as evidence of work authorization and is an acceptable document for I-9 employment eligibility verification. LPRs may work for any employer in any occupation without restriction, with limited exceptions (e.g., some federal government positions require U.S. citizenship). Green cards must be renewed every 10 years, but LPR status itself does not expire.',
+  },
+  asylum: {
+    label: 'Asylum Seeker / Asylee',
+    description: 'Asylum status is available to people who have been persecuted or have a well-founded fear of persecution based on race, religion, nationality, membership in a particular social group, or political opinion. People with granted asylum (asylees) are authorized to work in the United States. Asylum seekers who have filed a pending asylum application may apply for work authorization 150 days after filing a complete application, if it remains pending. An EAD is required for employment verification purposes.',
+  },
+  refugee: {
+    label: 'Refugee',
+    description: 'Refugees are people admitted to the United States through the U.S. Refugee Admissions Program (USRAP) after being determined to meet the definition of a refugee while outside the United States. Refugees are authorized to work immediately upon arrival in the United States. USCIS automatically issues an Employment Authorization Document (EAD) to refugees as part of the admissions process. Refugees may also apply for a green card one year after admission.',
+  },
+  daca: {
+    label: 'DACA Recipient',
+    description: 'Deferred Action for Childhood Arrivals (DACA) is a policy that grants certain individuals who came to the United States as children a period of deferred action from removal and eligibility for work authorization. DACA recipients must apply for an Employment Authorization Document (EAD) separately; deferred action alone does not authorize employment. DACA and its availability are subject to ongoing litigation; recipients should check the current USCIS guidance for program status.',
+  },
+  uvisa: {
+    label: 'U Visa Holder',
+    description: 'The U visa is a nonimmigrant visa for victims of certain qualifying crimes who have suffered substantial mental or physical abuse as a result of the crime and have been, are being, or are likely to be helpful to law enforcement in the investigation or prosecution of the crime. U visa holders are authorized to work in the United States. Their spouses, children, and certain other qualifying family members admitted as U derivatives are also eligible for work authorization.',
+  },
+  tvisa: {
+    label: 'T Visa Holder',
+    description: 'The T visa is a nonimmigrant visa for victims of a severe form of human trafficking who are physically present in the United States and comply with any reasonable request for assistance in an investigation or prosecution of human trafficking. T visa holders are authorized to work in the United States. Certain qualifying family members may also be admitted as T derivatives and may be eligible for work authorization.',
+  },
+  general: {
+    label: 'General / Multiple Statuses',
+    description: 'These topics apply across multiple immigration statuses or address concepts relevant to anyone navigating the U.S. work authorization system — such as what an Employment Authorization Document (EAD) is, the consequences of unauthorized employment, or when volunteering is permissible.',
+  },
+};
+
+export async function getStaticPaths() {
+  const statuses = [
+    'f1', 'j1', 'h1b', 'h4', 'l1', 'l2', 'o1', 'tn',
+    'gc', 'asylum', 'refugee', 'daca', 'uvisa', 'tvisa', 'general',
+  ];
+  return statuses.map(status => ({ params: { status } }));
+}
+
+const { status } = Astro.params;
+const info = statusInfo[status!];
+
+const allTopics = await getCollection('topics', ({ data }) =>
+  import.meta.env.PROD ? !data.draft : true
+);
+
+const topics = allTopics
+  .filter(t => t.data.statuses.includes(status as any))
+  .sort((a, b) => a.data.title.localeCompare(b.data.title));
+---
+<BaseLayout
+  title={info?.label ?? status ?? 'Status'}
+  description={`Work authorization topics for ${info?.label ?? status} visa holders.`}
+>
+  <div class="max-w-6xl mx-auto px-4 sm:px-6 py-8" data-pagefind-body>
+    <nav aria-label="Breadcrumb" class="text-sm text-gray-500 dark:text-slate-500 mb-4">
+      <a href="/" class="underline hover:text-blue-700 dark:hover:text-blue-400">Home</a>
+      {' › '}
+      <a href="/topics" class="underline hover:text-blue-700 dark:hover:text-blue-400">Topics</a>
+      {' › '}
+      <span aria-current="page" class="text-gray-700 dark:text-slate-300">{info?.label}</span>
+    </nav>
+
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-4">{info?.label}</h1>
+
+    {info?.description && (
+      <p class="text-gray-700 dark:text-slate-300 leading-relaxed max-w-3xl mb-8">
+        {info.description}
+      </p>
+    )}
+
+    {topics.length === 0 ? (
+      <p class="text-gray-500 dark:text-slate-500">No topics found for this status yet. <a href="/contribute" class="text-blue-700 dark:text-blue-400 underline hover:text-blue-900">Suggest one.</a></p>
+    ) : (
+      <>
+        <p class="text-sm text-gray-500 dark:text-slate-500 mb-6">
+          {topics.length} topic{topics.length !== 1 ? 's' : ''}
+        </p>
+        <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {topics.map(topic => (
+            <TopicCard topic={topic} />
+          ))}
+        </div>
+      </>
+    )}
+  </div>
+</BaseLayout>

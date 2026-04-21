@@ -1,0 +1,43 @@
+---
+export interface Props {
+  topic: {
+    slug: string;
+    data: {
+      title: string;
+      shortAnswer: string;
+      statuses: string[];
+    };
+  };
+}
+
+const { topic } = Astro.props;
+
+const statusLabels: Record<string, string> = {
+  f1: 'F-1', j1: 'J-1', h1b: 'H-1B', h4: 'H-4',
+  l1: 'L-1', l2: 'L-2', o1: 'O-1', tn: 'TN',
+  gc: 'Green Card', asylum: 'Asylum', refugee: 'Refugee',
+  daca: 'DACA', uvisa: 'U Visa', tvisa: 'T Visa', general: 'General',
+};
+
+const truncated = topic.data.shortAnswer.length > 130
+  ? topic.data.shortAnswer.slice(0, 130).trimEnd() + '…'
+  : topic.data.shortAnswer;
+---
+<a
+  href={`/topics/${topic.slug}`}
+  class="block border border-gray-200 dark:border-slate-700 rounded p-4 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group"
+>
+  <h3 class="text-base font-semibold text-gray-900 dark:text-slate-100 group-hover:text-blue-800 dark:group-hover:text-blue-300 leading-snug mb-1">
+    {topic.data.title}
+  </h3>
+  <p class="text-sm text-gray-600 dark:text-slate-400 leading-relaxed mb-3">
+    {truncated}
+  </p>
+  <div class="flex flex-wrap gap-1.5">
+    {topic.data.statuses.map(s => (
+      <span class="inline-block text-xs bg-gray-100 dark:bg-slate-800 text-gray-600 dark:text-slate-400 px-2 py-0.5 rounded">
+        {statusLabels[s] ?? s}
+      </span>
+    ))}
+  </div>
+</a>
