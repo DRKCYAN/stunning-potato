@@ -7,6 +7,16 @@ html {
   font-size: 17px;
 }
 
+/* Sans-serif everywhere */
+body {
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;
+}
+
+/* Sharp corners on all elements */
+* {
+  border-radius: 0 !important;
+}
+
 @media (min-width: 768px) {
   html {
     font-size: 18px;
@@ -105,6 +115,33 @@ html {
   top: 0;
 }
 
+/* Hide scrollbar (used on category nav bar) */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Filter chips on section landing pages */
+.filter-chip {
+  padding: 0.2rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  border: 1px solid #d1d5db;
+  background: #ffffff;
+  color: #4b5563;
+  cursor: pointer;
+  transition: background-color 0.15s, color 0.15s, border-color 0.15s;
+}
+.filter-chip:hover {
+  background: #f9fafb;
+  border-color: #9ca3af;
+}
+.filter-chip[data-active="true"] {
+  background: #dbeafe;
+  color: #1e40af;
+  border-color: #93c5fd;
+}
+
 /* Dark mode overrides */
 @media (prefers-color-scheme: dark) {
   html {
@@ -133,5 +170,19 @@ html {
   }
   .prose code {
     background: #1e293b;
+  }
+  .filter-chip {
+    background: #1e293b;
+    border-color: #475569;
+    color: #94a3b8;
+  }
+  .filter-chip:hover {
+    background: #334155;
+    border-color: #64748b;
+  }
+  .filter-chip[data-active="true"] {
+    background: rgba(30, 58, 138, 0.5);
+    color: #93c5fd;
+    border-color: #1d4ed8;
   }
 }

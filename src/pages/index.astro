@@ -1,105 +1,135 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Search from '../components/Search.astro';
-import TopicCard from '../components/TopicCard.astro';
 import Disclaimer from '../components/Disclaimer.astro';
 import { getCollection } from 'astro:content';
 
 const allTopics = await getCollection('topics', ({ data }) =>
   import.meta.env.PROD ? !data.draft : true
 );
+const allCollege = await getCollection('college', ({ data }) =>
+  import.meta.env.PROD ? !data.draft : true
+);
+const allQuestions = await getCollection('questions', ({ data }) =>
+  import.meta.env.PROD ? !data.draft : true
+);
 
-const featuredSlugs = [
-  'f1-opt',
-  'f1-cpt',
-  'f1-stem-opt',
-  'h1b-basics',
-  'h1b-side-work',
-  'h4-ead',
-  'ead-overview',
-  'working-without-authorization',
+type CardDef = {
+  href: string;
+  label: string;
+  icon: string;
+  description: string;
+  unit: string;
+  sectionId: string | null;
+};
+
+const cardDefs: CardDef[] = [
+  { href: '/topics',            label: 'Your Status',      icon: '💼', description: 'Can you work, and under what conditions?',                            unit: 'topic',       sectionId: null },
+  { href: '/college',           label: 'College',          icon: '🎓', description: 'Tuition, applications, and financial aid by status and state.',       unit: 'state guide', sectionId: null },
+  { href: '/education',         label: 'Education',        icon: '📚', description: 'K-12 enrollment, professional licensing, and foreign credentials.',    unit: 'question',    sectionId: 'education' },
+  { href: '/housing',           label: 'Housing',          icon: '🏠', description: 'Renting, leases, and housing protections.',                            unit: 'question',    sectionId: 'housing' },
+  { href: '/driving',           label: 'Driving',          icon: '🚗', description: "Driver's licenses and ID by state.",                                   unit: 'question',    sectionId: 'driving' },
+  { href: '/healthcare',        label: 'Healthcare',       icon: '🏥', description: 'Medicaid, clinics, insurance, and the public charge rule.',             unit: 'question',    sectionId: 'healthcare' },
+  { href: '/banking',           label: 'Banking',          icon: '🏦', description: 'Bank accounts, credit, ITINs, and tax obligations.',                   unit: 'question',    sectionId: 'banking' },
+  { href: '/law-enforcement',   label: 'Law Enforcement',  icon: '🛡️', description: 'Your rights during stops, ICE encounters, and raids.',                unit: 'question',    sectionId: 'law-enforcement' },
+  { href: '/family',            label: 'Family',           icon: '👨‍👩‍👧', description: 'Children, marriage, custody, and school enrollment.',               unit: 'question',    sectionId: 'family' },
+  { href: '/benefits',          label: 'Benefits',         icon: '🤝', description: "Which government benefits you can and can't access.",                  unit: 'question',    sectionId: 'benefits' },
+  { href: '/employment-rights', label: 'Workplace Rights', icon: '⚖️', description: "Wage theft, workers' comp, and protections on the job.",               unit: 'question',    sectionId: 'employment-rights' },
+  { href: '/travel',            label: 'Travel',           icon: '✈️', description: 'Advance parole, re-entry risks, and the border zone.',                 unit: 'question',    sectionId: 'travel' },
+  { href: '/civic',             label: 'Civic Life',       icon: '🗳️', description: 'Voting, jury duty, and Selective Service obligations.',               unit: 'question',    sectionId: 'civic' },
 ];
 
-const featuredTopics = featuredSlugs
-  .map(s => allTopics.find(t => t.slug === s))
-  .filter(Boolean) as typeof allTopics;
-
-const statusCards = [
-  { status: 'f1', label: 'F-1 Student', description: 'International students at SEVP-certified schools' },
-  { status: 'j1', label: 'J-1 Exchange Visitor', description: 'Exchange visitors in State Dept.-approved programs' },
-  { status: 'h1b', label: 'H-1B Worker', description: 'Specialty occupation employees' },
-  { status: 'h4', label: 'H-4 Dependent', description: 'Spouses and children of H-1B holders' },
-  { status: 'l1', label: 'L-1 / L-2', description: 'Intracompany transferees and their families' },
-  { status: 'gc', label: 'Green Card', description: 'Lawful permanent residents' },
-];
+const cards = cardDefs.map(def => {
+  if (def.sectionId === null) {
+    const count = def.href === '/topics' ? allTopics.length : allCollege.length;
+    return { ...def, count, comingSoon: false };
+  }
+  const qs = allQuestions.filter(q => q.data.section === def.sectionId);
+  return {
+    ...def,
+    count: qs.length,
+    comingSoon: qs.length === 0 || qs.every(q => q.data.comingSoon),
+  };
+});
 ---
-<BaseLayout title="WorkAuthUS" description="Plain-language answers to US work authorization questions, with links to the actual law.">
+<BaseLayout
+  title="KnowYourStatus"
+  description="Plain-language legal answers for immigrants in the US — with links to the actual law."
+>
+
   <!-- Hero -->
-  <section class="bg-blue-800 dark:bg-blue-950 text-white py-12 px-4">
-    <div class="max-w-3xl mx-auto text-center">
-      <h1 class="text-3xl sm:text-4xl font-bold mb-3 leading-tight">US Work Authorization, Explained</h1>
+  <section class="bg-blue-800 dark:bg-blue-950 text-white py-14 px-4">
+    <div class="max-w-2xl mx-auto text-center">
+      <h1 class="text-3xl sm:text-4xl font-bold mb-3 leading-tight">KnowYourStatus</h1>
       <p class="text-blue-100 text-lg mb-8 leading-relaxed">
-        Plain-language answers to common questions non-citizens have about working in the US, with direct links to the actual law.
+        Plain-language legal answers for immigrants in the US — with links to the actual law.
       </p>
-      <div class="max-w-xl mx-auto bg-white rounded">
+      <div class="bg-white rounded overflow-hidden">
         <Search />
       </div>
-      <p class="mt-3 text-blue-200 text-sm">Search topics, statuses, or regulations &mdash; or browse below</p>
+      <p class="mt-3 text-blue-200 text-sm">Search any question, or browse by topic below.</p>
     </div>
   </section>
 
-  <!-- Browse by status -->
+  <!-- Browse by topic -->
   <section class="max-w-6xl mx-auto px-4 sm:px-6 py-12">
-    <h2 class="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-6">Browse by immigration status</h2>
+    <h2 class="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-6">Browse by Topic</h2>
     <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {statusCards.map(card => (
+      {cards.map(card => (
         <a
-          href={`/status/${card.status}`}
-          class="block border border-gray-200 dark:border-slate-700 rounded p-4 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group"
+          href={card.href}
+          class="flex flex-col border border-gray-200 dark:border-slate-700 rounded-lg p-5 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors group"
         >
+          <div class="flex items-start justify-between mb-3">
+            <span class="text-3xl leading-none" aria-hidden="true">{card.icon}</span>
+            {card.comingSoon && (
+              <span class="text-xs text-gray-400 dark:text-slate-600 bg-gray-100 dark:bg-slate-800 rounded px-2 py-0.5 font-medium">
+                Coming soon
+              </span>
+            )}
+          </div>
           <h3 class="font-semibold text-gray-900 dark:text-slate-100 group-hover:text-blue-800 dark:group-hover:text-blue-300 mb-1">
             {card.label}
           </h3>
-          <p class="text-sm text-gray-600 dark:text-slate-400">{card.description}</p>
+          <p class="text-sm text-gray-600 dark:text-slate-400 leading-snug flex-1 mb-3">
+            {card.description}
+          </p>
+          <p class="text-xs text-gray-400 dark:text-slate-500">
+            {card.count} {card.unit}{card.count !== 1 ? 's' : ''}
+          </p>
         </a>
       ))}
     </div>
-    <p class="mt-4 text-sm text-gray-500 dark:text-slate-500">
-      <a href="/topics" class="text-blue-700 dark:text-blue-400 underline hover:text-blue-900 dark:hover:text-blue-300">
-        See all topics and statuses →
+  </section>
+
+  <!-- Not sure what status -->
+  <section class="max-w-6xl mx-auto px-4 sm:px-6 pb-12 border-t border-gray-100 dark:border-slate-800 pt-8">
+    <h2 class="text-base font-semibold text-gray-700 dark:text-slate-300 mb-2">Not sure what visa status you have?</h2>
+    <p class="text-sm text-gray-600 dark:text-slate-400 max-w-2xl leading-relaxed">
+      If you are unsure about your immigration status or what category applies to your situation, the most reliable step is to speak with a licensed immigration attorney or DOJ-accredited representative.
+      Many provide free or low-cost consultations.
+      <a href="/find-legal-help" class="text-blue-700 dark:text-blue-400 underline hover:text-blue-900 dark:hover:text-blue-300">
+        Find legal help near you →
       </a>
     </p>
   </section>
 
-  <!-- Most common questions -->
-  <section class="bg-gray-50 dark:bg-slate-900 py-12 px-4">
-    <div class="max-w-6xl mx-auto sm:px-6">
-      <h2 class="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-6">Most common questions</h2>
-      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        {featuredTopics.map(topic => (
-          <TopicCard topic={topic} />
-        ))}
-      </div>
-    </div>
-  </section>
-
   <!-- What this site is -->
-  <section class="max-w-3xl mx-auto px-4 sm:px-6 py-12">
-    <h2 class="text-2xl font-bold text-gray-900 dark:text-slate-100 mb-4">What this site is — and isn't</h2>
-    <div class="prose text-gray-700 dark:text-slate-300">
-      <p>
-        <strong>WorkAuthUS</strong> is a free, open-source reference site. Every page links directly to a primary source — a federal statute, regulation, or official agency page — so you can read the law yourself, not just our summary.
-      </p>
-      <p>
-        <strong>This site does not provide legal advice.</strong> Immigration law is complex and fact-specific. A rule that applies in one situation may not apply in yours. Nothing on this site creates an attorney-client relationship.
-      </p>
-      <p>
-        If you need advice for your specific situation, please <a href="/find-legal-help">find a licensed attorney or accredited representative</a>. Many provide free or low-cost consultations.
+  <section class="bg-gray-50 dark:bg-slate-900 py-10 px-4">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-lg font-semibold text-gray-800 dark:text-slate-200 mb-3">What this site is — and isn't</h2>
+      <p class="text-sm text-gray-600 dark:text-slate-400 leading-relaxed">
+        <strong class="font-semibold text-gray-700 dark:text-slate-300">KnowYourStatus</strong> is a free, open-source reference. Every answer links to a primary source — a federal statute, regulation, or official agency page — so you can read the law yourself.
+        This site does <strong class="font-semibold">not</strong> provide legal advice, does not use AI-generated content, and carries no ads.
+        For guidance on your specific situation, please
+        <a href="/find-legal-help" class="text-blue-700 dark:text-blue-400 underline hover:text-blue-900 dark:hover:text-blue-300">consult a licensed attorney or accredited representative</a>.
+        <a href="/about" class="ml-1 text-blue-700 dark:text-blue-400 underline hover:text-blue-900 dark:hover:text-blue-300">Learn more →</a>
       </p>
     </div>
   </section>
 
-  <div class="max-w-3xl mx-auto px-4 sm:px-6 pb-8">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8">
     <Disclaimer />
   </div>
+
 </BaseLayout>

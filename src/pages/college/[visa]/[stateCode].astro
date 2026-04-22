@@ -1,0 +1,184 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Disclaimer from '../../../components/Disclaimer.astro';
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+
+export async function getStaticPaths() {
+  const entries = await getCollection('college', ({ data }) =>
+    import.meta.env.PROD ? !data.draft : true
+  );
+  return entries.map(entry => ({
+    params: { visa: entry.data.visa, stateCode: entry.data.stateCode },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<'college'>;
+}
+
+const { entry } = Astro.props;
+const { data } = entry;
+const { Content } = await entry.render();
+
+// Traffic-light helpers
+type Status = 'yes' | 'no' | 'conditional' | 'varies';
+const statusLabel: Record<Status, string> = {
+  yes: 'Yes',
+  no: 'No',
+  conditional: 'Conditional',
+  varies: 'Varies',
+};
+const statusColor: Record<Status, string> = {
+  yes: 'bg-green-50 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800',
+  no: 'bg-red-50 text-red-800 border-red-200 dark:bg-red-900/20 dark:text-red-300 dark:border-red-800',
+  conditional: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800',
+  varies: 'bg-amber-50 text-amber-800 border-amber-200 dark:bg-amber-900/20 dark:text-amber-300 dark:border-amber-800',
+};
+
+// Related entries
+const allEntries = await getCollection('college', ({ data: d }) =>
+  import.meta.env.PROD ? !d.draft : true
+);
+const sameVisaOtherStates = allEntries.filter(
+  e => e.data.visa === data.visa && e.data.stateCode !== data.stateCode
+);
+const sameStateOtherVisas = allEntries.filter(
+  e => e.data.stateCode === data.stateCode && e.data.visa !== data.visa
+);
+---
+<BaseLayout
+  title={`${data.visaLabel} — College Applications in ${data.state}`}
+  description={`How ${data.visaLabel} holders are classified for tuition, public university eligibility, and state financial aid in ${data.state}.`}
+>
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8" data-pagefind-body>
+
+    <!-- Placeholder URL warning -->
+    <div role="alert" class="mb-6 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-300 dark:border-yellow-700 rounded text-sm text-yellow-800 dark:text-yellow-300">
+      <strong>Note:</strong> This page uses placeholder source links that are being replaced with verified URLs. Do not rely on the links until this notice is removed.
+    </div>
+
+    <!-- Breadcrumbs -->
+    <nav aria-label="Breadcrumb" class="text-sm text-gray-500 dark:text-slate-500 mb-4">
+      <ol class="flex flex-wrap items-center gap-1">
+        <li><a href="/" class="underline hover:text-blue-700 dark:hover:text-blue-400">Home</a></li>
+        <li aria-hidden="true" class="text-gray-400">›</li>
+        <li><a href="/college" class="underline hover:text-blue-700 dark:hover:text-blue-400">College Applications</a></li>
+        <li aria-hidden="true" class="text-gray-400">›</li>
+        <li><span class="text-gray-700 dark:text-slate-300" aria-current="page">{data.visaLabel} in {data.state}</span></li>
+      </ol>
+    </nav>
+
+    <!-- Title -->
+    <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-slate-100 mt-2 mb-6 leading-tight">
+      {data.visaLabel} — College Applications in {data.state}
+    </h1>
+
+    <!-- Summary card -->
+    <div class="border border-gray-200 dark:border-slate-700 rounded overflow-hidden mb-8">
+      <div class="bg-gray-50 dark:bg-slate-800/50 px-4 py-2 border-b border-gray-200 dark:border-slate-700">
+        <span class="text-xs font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-500">At a glance — {data.state}</span>
+      </div>
+      <dl class="divide-y divide-gray-100 dark:divide-slate-800">
+        {[
+          { label: 'In-state tuition eligible', value: data.inStateTuitionEligible as Status },
+          { label: 'Can apply to public universities', value: data.canApplyToPublicUniversities as Status },
+          { label: 'Eligible for state financial aid', value: data.canReceiveStateFinancialAid as Status },
+        ].map(row => (
+          <div class="flex items-center justify-between px-4 py-3">
+            <dt class="text-sm text-gray-700 dark:text-slate-300">{row.label}</dt>
+            <dd>
+              <span class={`inline-block px-3 py-1 rounded border text-sm font-semibold ${statusColor[row.value]}`}>
+                {statusLabel[row.value]}
+              </span>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+
+    <!-- Notes callout -->
+    {data.notes && (
+      <div class="bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-700 dark:border-blue-500 p-4 mb-8 rounded-sm text-sm text-gray-800 dark:text-slate-200 leading-relaxed">
+        <strong>Note:</strong> {data.notes}
+      </div>
+    )}
+
+    <!-- Verified metadata -->
+    <p class="text-xs text-gray-500 dark:text-slate-500 mb-6">
+      Last verified: <time datetime={data.lastVerified.toISOString().slice(0, 10)}>
+        {data.lastVerified.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' })}
+      </time>
+      &nbsp;·&nbsp; Verified by: {data.verifiedBy}
+    </p>
+
+    <!-- Rendered body -->
+    <article class="prose">
+      <Content />
+    </article>
+
+    <!-- Primary sources -->
+    <section class="mt-10 pt-6 border-t border-gray-200 dark:border-slate-700">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-slate-100 mb-4">Primary sources</h2>
+      <p class="text-sm text-amber-700 dark:text-amber-400 mb-3">
+        ⚠ These are placeholder links. Verified source URLs are being added.
+      </p>
+      <ul class="space-y-2 text-sm">
+        {data.primarySources.map(source => (
+          <li>
+            <span class="font-mono text-gray-500 dark:text-slate-500 text-xs">{source.citation}</span>
+            <span class="block text-gray-500 dark:text-slate-500 italic text-xs">{source.title} — <span class="font-mono">{source.url}</span></span>
+          </li>
+        ))}
+      </ul>
+    </section>
+
+    <!-- Related: same visa, other states -->
+    {sameVisaOtherStates.length > 0 && (
+      <section class="mt-8">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-slate-100 mb-3">{data.visaLabel} in other states</h2>
+        <ul class="flex flex-wrap gap-2">
+          {sameVisaOtherStates.map(e => (
+            <li>
+              <a
+                href={`/college/${e.data.visa}/${e.data.stateCode}`}
+                class="inline-block border border-gray-200 dark:border-slate-700 rounded px-3 py-1.5 text-sm text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 dark:hover:border-blue-600 transition-colors"
+              >
+                {e.data.state}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <!-- Related: same state, other visas -->
+    {sameStateOtherVisas.length > 0 && (
+      <section class="mt-6">
+        <h2 class="text-lg font-bold text-gray-900 dark:text-slate-100 mb-3">Other visa statuses in {data.state}</h2>
+        <ul class="flex flex-wrap gap-2">
+          {sameStateOtherVisas.map(e => (
+            <li>
+              <a
+                href={`/college/${e.data.visa}/${e.data.stateCode}`}
+                class="inline-block border border-gray-200 dark:border-slate-700 rounded px-3 py-1.5 text-sm text-blue-700 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-400 dark:hover:border-blue-600 transition-colors"
+              >
+                {e.data.visaLabel}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+
+    <Disclaimer />
+
+    <p class="mt-4 text-sm text-gray-500 dark:text-slate-500">
+      <a href="https://github.com/example/workauthorus/issues/new" target="_blank" rel="noopener noreferrer"
+         class="text-blue-700 dark:text-blue-400 underline hover:text-blue-900 dark:hover:text-blue-300">
+        See something wrong? Open an issue on GitHub
+      </a>
+    </p>
+  </div>
+</BaseLayout>

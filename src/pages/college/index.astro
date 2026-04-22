@@ -1,0 +1,185 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Disclaimer from '../../components/Disclaimer.astro';
+import { getCollection } from 'astro:content';
+
+const entries = await getCollection('college', ({ data }) =>
+  import.meta.env.PROD ? !data.draft : true
+);
+
+// Build a map of visa -> set of available stateCodes for the selector
+const available: Record<string, string[]> = {};
+for (const e of entries) {
+  if (!available[e.data.visa]) available[e.data.visa] = [];
+  available[e.data.visa].push(e.data.stateCode);
+}
+
+const visaOptions = [
+  { code: 'f1',           label: 'F-1',           description: 'International Student' },
+  { code: 'f2',           label: 'F-2',           description: 'Dependent of F-1 Student' },
+  { code: 'j1',           label: 'J-1',           description: 'Exchange Visitor' },
+  { code: 'j2',           label: 'J-2',           description: 'Dependent of J-1' },
+  { code: 'h1b',          label: 'H-1B',          description: 'Specialty Occupation Worker' },
+  { code: 'h4',           label: 'H-4',           description: 'Dependent of H-1B' },
+  { code: 'l1',           label: 'L-1',           description: 'Intracompany Transferee' },
+  { code: 'l2',           label: 'L-2',           description: 'Dependent of L-1' },
+  { code: 'o1',           label: 'O-1',           description: 'Extraordinary Ability Worker' },
+  { code: 'tn',           label: 'TN',            description: 'USMCA Professional' },
+  { code: 'td',           label: 'TD',            description: 'Dependent of TN' },
+  { code: 'gc',           label: 'Green Card',    description: 'Lawful Permanent Resident' },
+  { code: 'asylum',       label: 'Asylum',        description: 'Asylum Seeker / Asylee' },
+  { code: 'refugee',      label: 'Refugee',       description: 'Refugee' },
+  { code: 'daca',         label: 'DACA',          description: 'Deferred Action Recipient' },
+  { code: 'undocumented', label: 'Undocumented',  description: 'No Current Status' },
+];
+
+const states = [
+  { code: 'AL', name: 'Alabama' }, { code: 'AK', name: 'Alaska' },
+  { code: 'AZ', name: 'Arizona' }, { code: 'AR', name: 'Arkansas' },
+  { code: 'CA', name: 'California' }, { code: 'CO', name: 'Colorado' },
+  { code: 'CT', name: 'Connecticut' }, { code: 'DC', name: 'District of Columbia' },
+  { code: 'DE', name: 'Delaware' }, { code: 'FL', name: 'Florida' },
+  { code: 'GA', name: 'Georgia' }, { code: 'HI', name: 'Hawaii' },
+  { code: 'ID', name: 'Idaho' }, { code: 'IL', name: 'Illinois' },
+  { code: 'IN', name: 'Indiana' }, { code: 'IA', name: 'Iowa' },
+  { code: 'KS', name: 'Kansas' }, { code: 'KY', name: 'Kentucky' },
+  { code: 'LA', name: 'Louisiana' }, { code: 'ME', name: 'Maine' },
+  { code: 'MD', name: 'Maryland' }, { code: 'MA', name: 'Massachusetts' },
+  { code: 'MI', name: 'Michigan' }, { code: 'MN', name: 'Minnesota' },
+  { code: 'MS', name: 'Mississippi' }, { code: 'MO', name: 'Missouri' },
+  { code: 'MT', name: 'Montana' }, { code: 'NE', name: 'Nebraska' },
+  { code: 'NV', name: 'Nevada' }, { code: 'NH', name: 'New Hampshire' },
+  { code: 'NJ', name: 'New Jersey' }, { code: 'NM', name: 'New Mexico' },
+  { code: 'NY', name: 'New York' }, { code: 'NC', name: 'North Carolina' },
+  { code: 'ND', name: 'North Dakota' }, { code: 'OH', name: 'Ohio' },
+  { code: 'OK', name: 'Oklahoma' }, { code: 'OR', name: 'Oregon' },
+  { code: 'PA', name: 'Pennsylvania' }, { code: 'RI', name: 'Rhode Island' },
+  { code: 'SC', name: 'South Carolina' }, { code: 'SD', name: 'South Dakota' },
+  { code: 'TN', name: 'Tennessee' }, { code: 'TX', name: 'Texas' },
+  { code: 'UT', name: 'Utah' }, { code: 'VT', name: 'Vermont' },
+  { code: 'VA', name: 'Virginia' }, { code: 'WA', name: 'Washington' },
+  { code: 'WV', name: 'West Virginia' }, { code: 'WI', name: 'Wisconsin' },
+  { code: 'WY', name: 'Wyoming' },
+];
+---
+<BaseLayout title="College Applications by Immigration Status" description="How your immigration status affects college tuition classification, eligibility, and state financial aid — explained by state.">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 py-8">
+    <h1 class="text-3xl font-bold text-gray-900 dark:text-slate-100 mb-4">College Applications by Immigration Status</h1>
+    <p class="text-gray-700 dark:text-slate-300 leading-relaxed mb-6 max-w-2xl">
+      Your visa status can determine whether you pay in-state or out-of-state tuition, whether you can apply to public universities, and what state financial aid you can access. These rules vary dramatically by state — a student who qualifies for in-state tuition in California may not in Texas, and vice versa.
+    </p>
+
+    <Disclaimer />
+
+    <!-- Selector -->
+    <div class="mt-8">
+      <!-- Step 1 -->
+      <div id="step1">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-1">Step 1 — Select your visa status</h2>
+        <p class="text-sm text-gray-500 dark:text-slate-500 mb-4">Only statuses with available pages are shown as fully clickable.</p>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2" role="listbox" aria-label="Select visa status">
+          {visaOptions.map(v => {
+            const hasPages = Boolean(available[v.code]?.length);
+            return (
+              <button
+                type="button"
+                role="option"
+                aria-selected="false"
+                data-visa={v.code}
+                data-states={JSON.stringify(available[v.code] ?? [])}
+                class={[
+                  'visa-card text-left border rounded p-3 transition-colors',
+                  hasPages
+                    ? 'border-gray-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer'
+                    : 'border-gray-100 dark:border-slate-800 opacity-40 cursor-not-allowed',
+                ].join(' ')}
+                disabled={!hasPages}
+              >
+                <span class="block font-semibold text-sm text-gray-900 dark:text-slate-100">{v.label}</span>
+                <span class="block text-xs text-gray-500 dark:text-slate-500 mt-0.5">{v.description}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      <!-- Step 2 (hidden until visa selected) -->
+      <div id="step2" class="hidden mt-8">
+        <h2 class="text-lg font-semibold text-gray-900 dark:text-slate-100 mb-1">Step 2 — Select your state</h2>
+        <p id="step2-hint" class="text-sm text-gray-500 dark:text-slate-500 mb-3">States with a page available are marked.</p>
+        <div class="flex gap-3 items-center">
+          <label for="state-select" class="text-sm font-medium text-gray-700 dark:text-slate-300 sr-only">Select state</label>
+          <select
+            id="state-select"
+            class="border border-gray-300 dark:border-slate-600 rounded px-3 py-2 text-gray-900 dark:text-slate-100 bg-white dark:bg-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 w-64"
+            aria-label="Select a state"
+          >
+            <option value="">— Choose a state —</option>
+            {states.map(s => (
+              <option value={s.code} data-code={s.code}>{s.name} ({s.code})</option>
+            ))}
+          </select>
+          <span id="no-page-note" class="hidden text-sm text-amber-700 dark:text-amber-400">No page yet for this combination.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Browse all -->
+    <div class="mt-10 pt-6 border-t border-gray-200 dark:border-slate-700">
+      <p class="text-sm text-gray-600 dark:text-slate-400">
+        Prefer to browse?
+        <a href="/college/all" class="text-blue-700 dark:text-blue-400 underline hover:text-blue-900 dark:hover:text-blue-300 ml-1">
+          View all {entries.length} available visa + state combinations →
+        </a>
+      </p>
+    </div>
+  </div>
+</BaseLayout>
+
+<script is:inline>
+  (function () {
+    var selectedVisa = null;
+    var availableStates = [];
+
+    document.querySelectorAll('.visa-card').forEach(function (card) {
+      card.addEventListener('click', function () {
+        if (card.disabled) return;
+        document.querySelectorAll('.visa-card').forEach(function (c) {
+          c.classList.remove('bg-blue-100', 'border-blue-500', 'dark:bg-blue-900/40', 'dark:border-blue-400');
+          c.setAttribute('aria-selected', 'false');
+        });
+        card.classList.add('bg-blue-100', 'border-blue-500', 'dark:bg-blue-900/40', 'dark:border-blue-400');
+        card.setAttribute('aria-selected', 'true');
+        selectedVisa = card.dataset.visa;
+        availableStates = JSON.parse(card.dataset.states || '[]');
+
+        var step2 = document.getElementById('step2');
+        step2.classList.remove('hidden');
+
+        // Update state dropdown — mark available states
+        var select = document.getElementById('state-select');
+        Array.from(select.options).forEach(function (opt) {
+          if (!opt.value) return;
+          if (availableStates.includes(opt.value)) {
+            opt.textContent = opt.textContent.replace(' ✓', '') + ' ✓';
+          } else {
+            opt.textContent = opt.textContent.replace(' ✓', '');
+          }
+        });
+        select.value = '';
+        document.getElementById('no-page-note').classList.add('hidden');
+        step2.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      });
+    });
+
+    document.getElementById('state-select').addEventListener('change', function (e) {
+      var code = e.target.value;
+      if (!selectedVisa || !code) return;
+      if (availableStates.includes(code)) {
+        window.location.href = '/college/' + selectedVisa + '/' + code;
+      } else {
+        document.getElementById('no-page-note').classList.remove('hidden');
+      }
+    });
+  })();
+</script>

@@ -1,6 +1,6 @@
-# WorkAuthUS
+# KnowYourStatus
 
-**Plain-language answers to US work authorization questions, with links to the actual law.**
+**Plain-language legal answers for immigrants in the US — with links to the actual law.**
 
 > **Project status:** v0 — in active development. All pages are marked "Pending review." Attorney review is being sought. Do not rely on this site for legal advice.
 
@@ -8,7 +8,7 @@
 
 ## What this project is
 
-WorkAuthUS is a free, open-source, static website that answers common questions non-citizens have about working in the United States. Every topic page links directly to a primary source — a federal statute, regulation (CFR), or official government (.gov) page — so readers can verify information themselves.
+KnowYourStatus is a free, open-source, static website that answers common questions non-citizens have about working in the United States. Every topic page links directly to a primary source — a federal statute, regulation (CFR), or official government (.gov) page — so readers can verify information themselves.
 
 The site is built with [Astro](https://astro.build), uses [Tailwind CSS](https://tailwindcss.com) for styling, and uses [Pagefind](https://pagefind.app) for client-side full-text search. It is hosted for free on Cloudflare Pages or GitHub Pages.
 
