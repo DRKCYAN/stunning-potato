@@ -8,7 +8,7 @@ import { SECTIONS } from '../../data/sections';
 export async function getStaticPaths() {
   const questions = await getCollection('questions');
   return questions
-    .filter(q => !q.data.draft)
+    .filter(q => !q.data.draft && q.data.section !== 'law-enforcement')
     .map(q => {
       const parts = q.slug.split('/');
       return {
