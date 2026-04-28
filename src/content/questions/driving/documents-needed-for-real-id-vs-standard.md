@@ -59,12 +59,12 @@ To obtain a REAL ID, all states must require the following — no exceptions:
 A standard license has fewer federal requirements. Many states allow:
 
 | Document type | REAL ID | Standard license |
-|--------------|---------|-----------------|
+|------------------------------------|----------|-----------------|
 | U.S. passport or birth certificate | Required | May accept alternatives |
-| Social Security Number | Required | ITIN accepted in some states |
-| Proof of lawful status | Required | Not always required |
-| Consular ID (matrícula) | Not accepted | Accepted in some states |
-| Foreign passport alone | Not sufficient | May be accepted |
+| Social Security Number             | Required | ITIN accepted in some states |
+| Proof of lawful status             | Required | Not always required |
+| Consular ID (matrícula)            | Not accepted | Accepted in some states |
+| Foreign passport alone             | Not sufficient | May be accepted |
 
 > Exact requirements vary by state. Check your state DMV's official website.
 

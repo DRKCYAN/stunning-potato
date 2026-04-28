@@ -1,7 +1,7 @@
 ---
 title: "What happens if you work without authorization?"
 shortAnswer: "Working without authorization is a serious violation of U.S. immigration law. Consequences can include deportation, multi-year bars on returning to the United States, denial of future visas and green cards, and criminal prosecution for employers. There is no statute of limitations—past unauthorized work can affect applications years later."
-statuses: ["f1", "j1", "h1b", "h4", "l1", "l2", "o1", "tn", "gc", "asylum", "refugee", "daca", "uvisa", "tvisa", "general"]
+statuses: ["general"]
 themes: ["unauthorized-work", "status-violation", "consequences"]
 primarySources:
   - citation: "INA § 274A"

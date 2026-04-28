@@ -1,7 +1,7 @@
 ---
 title: "What is an EAD and how do you get one?"
 shortAnswer: "An Employment Authorization Document (EAD), also called Form I-766, is a card issued by USCIS that proves you are authorized to work in the United States. You apply using Form I-765. Not everyone needs one—some visa holders (H-1B, L-1, TN) are work-authorized by their status, not a separate card."
-statuses: ["f1", "j1", "h4", "l2", "asylum", "refugee", "daca", "uvisa", "tvisa", "general"]
+statuses: ["general"]
 themes: ["ead", "i765", "work-authorization"]
 primarySources:
   - citation: "Form I-765"

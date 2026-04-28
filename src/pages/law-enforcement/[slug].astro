@@ -1,40 +1,27 @@
 ---
-export const prerender = false;
-
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Disclaimer from '../../components/Disclaimer.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
-import { fetchWiki, type WikiArticle } from '../../lib/wikipedia';
 
-// ── Topic definitions ────────────────────────────────────────────────────────
-
-interface GovLink {
-  label: string;
-  url: string;
-}
-
+interface GovLink { label: string; url: string; }
 interface TopicConfig {
   title: string;
+  intro: string;
   wikiArticles: string[];
   sectionsToShow: string[];
   govLinks: GovLink[];
-  intro: string;
 }
 
 const TOPICS: Record<string, TopicConfig> = {
   'ice-vs-local-police': {
     title: "ICE vs. local police: what's the difference?",
-    intro:
-      "U.S. Immigration and Customs Enforcement (ICE) is a federal agency. Local police are state or municipal law enforcement. They have different legal authority, different missions, and different rules about when they can ask about immigration status.",
+    intro: "U.S. Immigration and Customs Enforcement (ICE) is a federal agency. Local police are state or municipal law enforcement. They have different legal authority, different missions, and different rules about when they can ask about your immigration status.",
     wikiArticles: [
       'U.S. Immigration and Customs Enforcement',
       '287(g) program',
       'Sanctuary city',
     ],
-    sectionsToShow: [
-      'Mission', 'Organization', 'Enforcement', 'Criticism', 'Overview',
-      'History', 'Definition', 'Legal authority', 'Background',
-    ],
+    sectionsToShow: ['Mission','Organization','Enforcement','Criticism','Overview','History','Definition','Legal authority','Background'],
     govLinks: [
       { label: 'ICE — Official Site', url: 'https://www.ice.gov' },
       { label: 'DHS — Immigration Enforcement', url: 'https://www.dhs.gov/topic/immigration-enforcement' },
@@ -44,17 +31,13 @@ const TOPICS: Record<string, TopicConfig> = {
   },
   'rights-during-traffic-stop': {
     title: 'Your rights during a traffic stop',
-    intro:
-      "Whether you are a citizen, visa holder, or undocumented, you have constitutional rights during a traffic stop. Knowing them can protect you regardless of your immigration status.",
+    intro: "Whether you are a citizen, visa holder, or undocumented, you have constitutional rights during a traffic stop. Knowing them can protect you regardless of your immigration status.",
     wikiArticles: [
       'Traffic stop',
       'Fourth Amendment to the United States Constitution',
       'Terry stop',
     ],
-    sectionsToShow: [
-      'Rights', 'Procedure', 'Overview', 'History', 'Background',
-      'Searches and seizures', 'Legal standard', 'Reasonableness', 'Stop and frisk',
-    ],
+    sectionsToShow: ['Rights','Procedure','Overview','History','Background','Searches and seizures','Legal standard','Reasonableness','Stop and frisk'],
     govLinks: [
       { label: 'ACLU — Your Rights During a Traffic Stop', url: 'https://www.aclu.org/know-your-rights/stops-and-arrests' },
       { label: 'DOJ — Civil Rights Division', url: 'https://www.justice.gov/crt' },
@@ -63,44 +46,43 @@ const TOPICS: Record<string, TopicConfig> = {
   },
 };
 
-// ── Route handling ───────────────────────────────────────────────────────────
-
-const { slug } = Astro.params;
-const topic = slug ? TOPICS[slug] : undefined;
-
-if (!topic) {
-  return Astro.redirect('/404');
+export function getStaticPaths() {
+  const topics: Record<string, TopicConfig> = {
+    'ice-vs-local-police': {
+      title: "ICE vs. local police: what's the difference?",
+      intro: "U.S. Immigration and Customs Enforcement (ICE) is a federal agency. Local police are state or municipal law enforcement. They have different legal authority, different missions, and different rules about when they can ask about your immigration status.",
+      wikiArticles: ['U.S. Immigration and Customs Enforcement', '287(g) program', 'Sanctuary city'],
+      sectionsToShow: ['Mission','Organization','Enforcement','Criticism','Overview','History','Definition','Legal authority','Background'],
+      govLinks: [
+        { label: 'ICE — Official Site', url: 'https://www.ice.gov' },
+        { label: 'DHS — Immigration Enforcement', url: 'https://www.dhs.gov/topic/immigration-enforcement' },
+        { label: 'ACLU — Immigrants\' Rights', url: 'https://www.aclu.org/know-your-rights/immigrants-rights' },
+        { label: 'DOJ — Civil Rights Division', url: 'https://www.justice.gov/crt' },
+      ],
+    },
+    'rights-during-traffic-stop': {
+      title: 'Your rights during a traffic stop',
+      intro: "Whether you are a citizen, visa holder, or undocumented, you have constitutional rights during a traffic stop. Knowing them can protect you regardless of your immigration status.",
+      wikiArticles: ['Traffic stop', 'Fourth Amendment to the United States Constitution', 'Terry stop'],
+      sectionsToShow: ['Rights','Procedure','Overview','History','Background','Searches and seizures','Legal standard','Reasonableness','Stop and frisk'],
+      govLinks: [
+        { label: 'ACLU — Your Rights During a Traffic Stop', url: 'https://www.aclu.org/know-your-rights/stops-and-arrests' },
+        { label: 'DOJ — Civil Rights Division', url: 'https://www.justice.gov/crt' },
+        { label: 'USCIS — Know Your Rights', url: 'https://www.uscis.gov/forms/civil-rights/know-your-rights' },
+      ],
+    },
+  };
+  return Object.entries(topics).map(([slug, topic]) => ({ params: { slug }, props: { topic } }));
 }
 
-// ── Fetch Wikipedia articles ─────────────────────────────────────────────────
-
-let articles: WikiArticle[] = [];
-let fetchError = false;
-let fetchedAt = '';
-
-try {
-  articles = await Promise.all(topic.wikiArticles.map(fetchWiki));
-  fetchedAt = new Date().toUTCString();
-} catch (err) {
-  console.error('Wikipedia fetch error:', err);
-  fetchError = true;
-}
-
-const showSet = new Set(topic.sectionsToShow.map(s => s.toLowerCase()));
-
-function relevantSections(article: WikiArticle) {
-  return article.sections.filter(s => showSet.has(s.title.toLowerCase()));
-}
+const { topic } = Astro.props as { topic: TopicConfig };
 ---
 
-<BaseLayout
-  title={`${topic.title} — KnowYourStatus`}
-  description={topic.intro}
->
+<BaseLayout title={`${topic.title} — KnowYourStatus`} description={topic.intro}>
   <div class="max-w-3xl mx-auto px-4 sm:px-6 py-8">
     <Breadcrumbs items={[
       { label: 'Home', href: '/' },
-      { label: "Law Enforcement", href: '/law-enforcement' },
+      { label: 'Law Enforcement', href: '/law-enforcement' },
       { label: topic.title },
     ]} />
 
@@ -108,114 +90,153 @@ function relevantSections(article: WikiArticle) {
       {topic.title}
     </h1>
 
-    <!-- Live data badge -->
+    <!-- Live badge -->
     <div class="mt-3 flex items-center gap-2">
       <span class="inline-flex items-center gap-1.5 rounded-full bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700 px-3 py-1 text-xs font-medium text-green-700 dark:text-green-400">
-        <span class="h-1.5 w-1.5 rounded-full bg-green-500"></span>
+        <span class="h-1.5 w-1.5 rounded-full bg-green-500 animate-pulse"></span>
         Live — fetched from Wikipedia
       </span>
-      {fetchedAt && (
-        <span class="text-xs text-gray-400 dark:text-slate-500">{fetchedAt}</span>
-      )}
+      <span id="fetched-at" class="text-xs text-gray-400 dark:text-slate-500"></span>
     </div>
 
-    <!-- Intro -->
     <p class="mt-6 text-lg text-gray-700 dark:text-slate-300 leading-relaxed">
       {topic.intro}
     </p>
 
-    {fetchError ? (
-      <div class="mt-8 rounded border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 px-5 py-4">
-        <p class="font-semibold text-amber-800 dark:text-amber-300">Could not load live content</p>
-        <p class="mt-1 text-sm text-amber-700 dark:text-amber-400">
-          Wikipedia could not be reached right now. Try refreshing the page, or visit the sources directly below.
-        </p>
-      </div>
-    ) : (
-      <div class="mt-10 space-y-12">
-        {articles.map((article) => {
-          const sections = relevantSections(article);
-          return (
-            <div>
-              <!-- Article header -->
-              <div class="flex items-baseline justify-between gap-4 border-b border-gray-200 dark:border-slate-700 pb-2 mb-5">
-                <h2 class="text-xl font-bold text-gray-900 dark:text-slate-100">
-                  {article.title}
-                </h2>
-                <a
-                  href={article.url}
-                  class="shrink-0 text-xs text-blue-600 dark:text-blue-400 hover:underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  Wikipedia ↗
-                </a>
-              </div>
+    <!-- Loading skeleton -->
+    <div id="wiki-loading" class="mt-10 space-y-8 animate-pulse">
+      {[1,2,3].map(() => (
+        <div>
+          <div class="h-5 bg-gray-200 dark:bg-slate-700 rounded w-1/2 mb-4"></div>
+          <div class="space-y-2">
+            <div class="h-3 bg-gray-100 dark:bg-slate-800 rounded w-full"></div>
+            <div class="h-3 bg-gray-100 dark:bg-slate-800 rounded w-5/6"></div>
+            <div class="h-3 bg-gray-100 dark:bg-slate-800 rounded w-4/6"></div>
+          </div>
+        </div>
+      ))}
+    </div>
 
-              <!-- Intro paragraph -->
-              <p class="text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
-                {article.intro}
-              </p>
+    <!-- Wikipedia content injected here -->
+    <div id="wiki-content" class="mt-10 space-y-12 hidden"></div>
 
-              <!-- Relevant sections -->
-              {sections.map((sec) => (
-                <div class="mt-6">
-                  <h3 class="text-base font-semibold text-gray-800 dark:text-slate-200 mb-2">
-                    {sec.title}
-                  </h3>
-                  <p class="text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">
-                    {sec.content}
-                  </p>
-                </div>
-              ))}
-            </div>
-          );
-        })}
-      </div>
-    )}
+    <!-- Error state -->
+    <div id="wiki-error" class="mt-8 hidden rounded border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700 px-5 py-4">
+      <p class="font-semibold text-amber-800 dark:text-amber-300">Could not load live content</p>
+      <p class="mt-1 text-sm text-amber-700 dark:text-amber-400">
+        Wikipedia could not be reached. Try refreshing, or visit the sources below.
+      </p>
+    </div>
 
-    <!-- Government sources -->
+    <!-- Official sources (always visible) -->
     <div class="mt-12 border-t border-gray-200 dark:border-slate-700 pt-6">
       <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400 mb-3">
-        Official & Legal Sources
+        Official &amp; Legal Sources
       </h2>
       <ul class="space-y-2">
-        {topic.govLinks.map((link) => (
+        {topic.govLinks.map(link => (
           <li>
-            <a
-              href={link.url}
-              class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
+            <a href={link.url} class="text-sm text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">
               {link.label} ↗
             </a>
           </li>
         ))}
-        {articles.map((article) => (
-          <li>
-            <a
-              href={article.url}
-              class="text-sm text-blue-600 dark:text-blue-400 hover:underline"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Wikipedia — {article.title} ↗
-            </a>
-          </li>
-        ))}
       </ul>
+      <div id="wiki-source-links" class="mt-2 space-y-2"></div>
       <p class="mt-4 text-xs text-gray-400 dark:text-slate-500">
         Wikipedia content is used under the{' '}
-        <a href="https://creativecommons.org/licenses/by-sa/4.0/" class="underline" target="_blank" rel="noopener noreferrer">
-          CC BY-SA 4.0 license
-        </a>.
-        Content is fetched live and may differ from the current Wikipedia article.
+        <a href="https://creativecommons.org/licenses/by-sa/4.0/" class="underline" target="_blank" rel="noopener noreferrer">CC BY-SA 4.0 license</a>.
+        Content is fetched live on each page visit.
       </p>
     </div>
 
-    <div class="mt-10">
-      <Disclaimer />
-    </div>
+    <div class="mt-10"><Disclaimer /></div>
   </div>
 </BaseLayout>
+
+<script define:vars={{ wikiArticles: topic.wikiArticles, sectionsToShow: topic.sectionsToShow }}>
+const WIKI_API = 'https://en.wikipedia.org/w/api.php';
+
+function clean(text, max) {
+  text = text.replace(/\[.*?\]/g, '').replace(/\n{3,}/g, '\n\n').trim();
+  if (text.length > max) {
+    const cut = text.lastIndexOf('. ', max);
+    text = (cut !== -1 ? text.slice(0, cut + 1) : text.slice(0, max)).trim();
+  }
+  return text;
+}
+
+function parseSections(text) {
+  const chunks = text.split(/\n== (.*?) ==\n/);
+  const out = [];
+  for (let i = 1; i < chunks.length; i += 2) {
+    const content = clean(chunks[i + 1] || '', 1400);
+    if (content.length > 80) out.push({ title: chunks[i], content });
+  }
+  return out;
+}
+
+async function fetchWiki(title) {
+  const params = new URLSearchParams({
+    action: 'query', prop: 'extracts', explaintext: '1',
+    exsectionformat: 'plain', titles: title, format: 'json',
+    redirects: '1', origin: '*',
+  });
+  const res = await fetch(`${WIKI_API}?${params}`);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  const data = await res.json();
+  const page = Object.values(data.query.pages)[0];
+  if ('missing' in page) throw new Error(`Not found: ${title}`);
+  const text = page.extract || '';
+  return {
+    title: page.title,
+    intro: clean(text.split(/\n== /)[0], 900),
+    sections: parseSections(text),
+    url: `https://en.wikipedia.org/wiki/${encodeURIComponent(page.title.replace(/ /g, '_'))}`,
+  };
+}
+
+function renderArticle(article, showSet) {
+  const relevant = article.sections.filter(s => showSet.has(s.title.toLowerCase()));
+  const div = document.createElement('div');
+  div.innerHTML = `
+    <div class="flex items-baseline justify-between gap-4 border-b border-gray-200 dark:border-slate-700 pb-2 mb-5">
+      <h2 class="text-xl font-bold text-gray-900 dark:text-slate-100">${article.title}</h2>
+      <a href="${article.url}" class="shrink-0 text-xs text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">Wikipedia ↗</a>
+    </div>
+    <p class="text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">${article.intro}</p>
+    ${relevant.map(s => `
+      <div class="mt-6">
+        <h3 class="text-base font-semibold text-gray-800 dark:text-slate-200 mb-2">${s.title}</h3>
+        <p class="text-gray-700 dark:text-slate-300 leading-relaxed whitespace-pre-line">${s.content}</p>
+      </div>`).join('')}
+  `;
+  return div;
+}
+
+(async () => {
+  const showSet = new Set(sectionsToShow.map(s => s.toLowerCase()));
+  const loadingEl = document.getElementById('wiki-loading');
+  const contentEl = document.getElementById('wiki-content');
+  const errorEl = document.getElementById('wiki-error');
+  const fetchedAtEl = document.getElementById('fetched-at');
+  const sourceLinksEl = document.getElementById('wiki-source-links');
+
+  try {
+    const articles = await Promise.all(wikiArticles.map(fetchWiki));
+    loadingEl.classList.add('hidden');
+    articles.forEach(article => {
+      contentEl.appendChild(renderArticle(article, showSet));
+      const li = document.createElement('li');
+      li.innerHTML = `<a href="${article.url}" class="text-sm text-blue-600 dark:text-blue-400 hover:underline" target="_blank" rel="noopener noreferrer">Wikipedia — ${article.title} ↗</a>`;
+      sourceLinksEl.appendChild(li);
+    });
+    contentEl.classList.remove('hidden');
+    fetchedAtEl.textContent = new Date().toUTCString();
+  } catch (err) {
+    console.error('Wikipedia fetch failed:', err);
+    loadingEl.classList.add('hidden');
+    errorEl.classList.remove('hidden');
+  }
+})();
+</script>

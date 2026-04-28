@@ -1,17 +1,15 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Disclaimer from '../../components/Disclaimer.astro';
-import { getCollection } from 'astro:content';
+import { getAllCollegeTopics } from '../../lib/college-config';
 
-const entries = await getCollection('college', ({ data }) =>
-  import.meta.env.PROD ? !data.draft : true
-);
+const entries = getAllCollegeTopics();
 
 // Build a map of visa -> set of available stateCodes for the selector
 const available: Record<string, string[]> = {};
 for (const e of entries) {
-  if (!available[e.data.visa]) available[e.data.visa] = [];
-  available[e.data.visa].push(e.data.stateCode);
+  if (!available[e.visa]) available[e.visa] = [];
+  available[e.visa].push(e.stateCode);
 }
 
 const visaOptions = [

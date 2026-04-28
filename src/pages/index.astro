@@ -3,13 +3,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Search from '../components/Search.astro';
 import Disclaimer from '../components/Disclaimer.astro';
 import { getCollection } from 'astro:content';
+import { getAllCollegeTopics } from '../lib/college-config';
 
 const allTopics = await getCollection('topics', ({ data }) =>
   import.meta.env.PROD ? !data.draft : true
 );
-const allCollege = await getCollection('college', ({ data }) =>
-  import.meta.env.PROD ? !data.draft : true
-);
+const allCollege = getAllCollegeTopics();
 const allQuestions = await getCollection('questions', ({ data }) =>
   import.meta.env.PROD ? !data.draft : true
 );
