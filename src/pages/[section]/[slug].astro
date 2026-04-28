@@ -21,6 +21,8 @@ export async function getStaticPaths() {
 const { section } = Astro.params;
 const { question } = Astro.props;
 const meta = SECTIONS[section as keyof typeof SECTIONS];
+const { Content } = await question.render();
+const { comingSoon, primarySources, lastVerified, verifiedBy } = question.data;
 ---
 
 <BaseLayout
@@ -38,24 +40,57 @@ const meta = SECTIONS[section as keyof typeof SECTIONS];
       {question.data.title}
     </h1>
 
-    <div class="mt-6 rounded border border-blue-300 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-700 px-5 py-4">
-      <p class="font-semibold text-blue-800 dark:text-blue-300">This page is under development</p>
-      <p class="mt-1 text-sm text-blue-700 dark:text-blue-400">
-        Content with primary source links will be added soon.
-        <a
-          href="https://github.com/DRKCYAN/stunning-potato/issues"
-          class="underline hover:text-blue-900 dark:hover:text-blue-200"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Contribute on GitHub
-        </a>.
-      </p>
-    </div>
+    {comingSoon ? (
+      <div class="mt-6 rounded border border-blue-300 bg-blue-50 dark:bg-blue-900/20 dark:border-blue-700 px-5 py-4">
+        <p class="font-semibold text-blue-800 dark:text-blue-300">This page is under development</p>
+        <p class="mt-1 text-sm text-blue-700 dark:text-blue-400">
+          Content with primary source links will be added soon.{' '}
+          <a
+            href="https://github.com/DRKCYAN/stunning-potato/issues"
+            class="underline hover:text-blue-900 dark:hover:text-blue-200"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Contribute on GitHub
+          </a>.
+        </p>
+      </div>
+    ) : (
+      <>
+        <div class="mt-8 prose prose-gray dark:prose-invert max-w-none text-gray-700 dark:text-slate-300">
+          <Content />
+        </div>
 
-    <!-- Answer content will go here -->
-    <div class="mt-8 prose dark:prose-invert text-gray-700 dark:text-slate-300 min-h-[8rem]">
-    </div>
+        {primarySources && primarySources.length > 0 && (
+          <div class="mt-10 border-t border-gray-200 dark:border-slate-700 pt-6">
+            <h2 class="text-sm font-semibold uppercase tracking-wide text-gray-500 dark:text-slate-400 mb-3">
+              Primary Sources
+            </h2>
+            <ul class="space-y-2">
+              {primarySources.map((src: { citation: string; title: string; url: string }) => (
+                <li class="text-sm text-gray-600 dark:text-slate-400">
+                  <span class="font-medium">{src.citation}</span> —{' '}
+                  <a
+                    href={src.url}
+                    class="text-blue-600 dark:text-blue-400 hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {src.title}
+                  </a>
+                </li>
+              ))}
+            </ul>
+            {lastVerified && (
+              <p class="mt-3 text-xs text-gray-400 dark:text-slate-500">
+                Last verified: {new Date(lastVerified).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+                {verifiedBy ? ` · ${verifiedBy}` : ''}
+              </p>
+            )}
+          </div>
+        )}
+      </>
+    )}
 
     <div class="mt-10">
       <Disclaimer />
